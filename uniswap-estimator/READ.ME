@@ -1,0 +1,58 @@
+# Uniswap V2 Swap Estimator API
+
+Простой REST API на Go, который позволяет рассчитать примерное количество токенов, которое можно получить при обмене на пуле Uniswap V2.
+
+---
+
+## Описание
+
+API предоставляет один endpoint `/estimate`, который принимает параметры:
+
+- `pool` — адрес Uniswap V2 пула (например, `0x0d4a11d5eeaac28ec3f61d100daf4d40471f1852`)
+- `src` — адрес токена, который отправляем (например, USDT: `0xdAC17F958D2ee523a2206206994597C13D831ec7`)
+- `dst` — адрес токена, который хотим получить (например, WETH: `0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2`)
+- `src_amount` — количество токенов `src` для обмена (в минимальных единицах, с учётом decimals)
+
+На основе текущего состояния пула, данные которого берутся с Ethereum через RPC (Infura, Alchemy и т.п.), рассчитывается количество `dst` токенов по формуле Uniswap V2.
+
+---
+
+## Как запустить
+
+### 1. Клонировать репозиторий
+
+```bash
+git clone https://github.com/yourusername/uniswap-estimator.git
+cd uniswap-estimator
+
+### 2. Создать файл .env с переменной окружения
+
+```bash
+ETH_RPC_URL=https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID
+
+### 3. Запуск локально
+
+```bash
+go mod tidy
+go run main.go
+Сервер будет слушать на http://localhost:1337.
+
+### 4. Пример запроса
+```bash
+curl "http://localhost:1337/estimate?pool=0x0d4a11d5eeaac28ec3f61d100daf4d40471f1852&src=0xdAC17F958D2ee523a2206206994597C13D831ec7&dst=0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2&src_amount=10000000"
+
+Ответ:
+```bash
+{
+  "dst_amount": "3902586224158065"
+}
+
+### 5. Запуск через Docker
+
+Соберите Docker образ:
+
+```bash
+docker build -t uniswap-estimator .
+
+```bash
+docker run -p 1337:1337 -e ETH_RPC_URL="https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID" uniswap-estimator
